@@ -1,19 +1,10 @@
-package org.example;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+package com.misuki;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
+
+import java.util.Map;
 
 public class App
 {
-    private static final int MAX_PAGES = 10;
-    private static final Set<String> visited = new HashSet<>();
 
     public static void main( String[] args )
     {
@@ -23,20 +14,48 @@ public class App
                 "https://en.wikipedia.org/wiki/Pharaoh"
         };
 
-        for (String url : startUrls) {
-            crawl(url);
-        }
-        String[] visited_output = visited.toArray(new String[0]);
+        JWEC crawler = new JWEC(startUrls);
+        String[] visited_output = crawler.start();
 
         for (String s : visited_output) {
             System.out.println(s);
         }
+
+        String query = "who is the first pharaoh of egypt hello world get me a good entry please?";
+        for (Map.Entry<String, Double> tfentry : crawler.rank_similarity(query).entrySet()){
+            System.out.println("key: "+tfentry.getKey()+" | value: "+tfentry.getValue());
+        }
+
+
+
+        /*
+        System.out.println("\nInverted Index Statistics:");
+        System.out.println("Total unique words: " + invertedIndex.size());
+        System.out.println("Total documents indexed: " + visited.size());
+
+        // Print sample of the inverted index (first 20 entries)
+        System.out.println("\nSample of Inverted Index (first 20 entries):");
+        int count = 0;
+        for (Map.Entry<String, Set<String>> entry : invertedIndex.entrySet()) {
+            if (count++ >= 20) break;
+            System.out.println(entry.getKey() + ": " + entry.getValue().size() + " documents");
+        }
+
+         */
+
 
     }
 
 
 
 
+
+
+
+
+
+
+/*
     public static void crawl(String url) {
         if (!url.contains("wikipedia.org")) return;
         url = cleanUrl(url);
@@ -77,4 +96,19 @@ public class App
             return url;
         }
     }
+
+
+    private static void indexDocument(String url, String text) {
+        // Simple tokenization - split on whitespace and punctuation
+        String[] words = text.toLowerCase().split("[\\s.,;:!?()\"'-]+");
+
+        for (String word : words) {
+            if (word.length() < 3) continue; // skip stop_words
+
+            // Update the inverted index
+            invertedIndex.computeIfAbsent(word, k -> new HashSet<>()).add(url);
+        }
+    }
+*/
+
 }
