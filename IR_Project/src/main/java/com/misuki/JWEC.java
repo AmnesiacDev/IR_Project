@@ -12,7 +12,7 @@ import java.util.*;
 
 public class JWEC {
 
-    private static final int MAX_PAGES = 10;
+    private static final int MAX_PAGES = 50;
     private static final Set<String> visited = new HashSet<>();
     private static final Map<String, Set<String>> invertedIndex = new HashMap<>();
     private static final Map<String, String[]> urlToText = new HashMap<String, String[]>();
@@ -63,13 +63,20 @@ public class JWEC {
     }
 
 
+    private static boolean is_valid_doc(String url) {
+        // Must be on en.wikipedia.org and under /wiki/
+        if (!url.startsWith("https://en.wikipedia.org/wiki/")) return false;
 
+        // Exclude administrative or non-article pages (those with colons, etc.)
+        String title = url.substring("https://en.wikipedia.org/wiki/".length());
+        return !title.contains(":") && !title.startsWith("Main_Page");
+    }
     private void crawl(String url){
         this.url = url;
         crawl();
     }
     private void crawl() {
-        if (!url.contains("wikipedia.org")) return;
+        if (!url.contains("en.wikipedia.org")) return;
         url = cleanUrl(url);
         if (visited.contains(url) || visited.size() >= MAX_PAGES) return;
 
@@ -93,7 +100,7 @@ public class JWEC {
                 String nextUrl = link.absUrl("href");
                 nextUrl = cleanUrl(nextUrl);
 
-                if (nextUrl.contains("wikipedia.org") && !visited.contains(nextUrl)) {
+                if (is_valid_doc(nextUrl) && !visited.contains(nextUrl)) {
                     crawl(nextUrl);
                 }
             }
@@ -150,8 +157,8 @@ public class JWEC {
             Map<String, Double> local_tf_idf = new HashMap<>();
             for(Map.Entry<String, Integer> tf_entry: doc_tf.entrySet()){
                 double tf = (double) tf_entry.getValue() / doc_len;
-                double idf = idf_map.getOrDefault(entry.getKey(), Math.log((double) total_docs));
-                local_tf_idf.put(entry.getKey(), tf*idf);
+                double idf = idf_map.getOrDefault(tf_entry.getKey(), Math.log((double) total_docs));
+                local_tf_idf.put(tf_entry.getKey(), tf * idf);
             }
             doc_tf_idf.put(entry.getKey(), local_tf_idf);
         }

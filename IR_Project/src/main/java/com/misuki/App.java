@@ -8,7 +8,7 @@ public class App
 
     public static void main( String[] args )
     {
-
+        System.out.println("hello");
         String[] startUrls = {
                 "https://en.wikipedia.org/wiki/List_of_pharaohs",
                 "https://en.wikipedia.org/wiki/Pharaoh"
