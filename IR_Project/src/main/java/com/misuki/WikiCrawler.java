@@ -11,6 +11,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
+/**
+ * Crawler class to crawl Wikipedia pages from a preset list of Wikipedia URLs then saves and then cleans the URLs and extracted data
+ */
 public class WikiCrawler {
     private static final Set<String> visited = new HashSet<>();
     private static final Map<String, Set<String>> invertedIndex = new HashMap<>();
@@ -20,12 +23,16 @@ public class WikiCrawler {
     private final String[] start_urls;
     private String url;
 
-    public static final int MAX_PAGES = 10;
+
+    public static int MAX_PAGES = 50;
 
     public WikiCrawler(String[] start_urls) {
         this.start_urls = start_urls;
     }
 
+    /**
+     * Start Crawling like a spider
+     */
     public void start(){
 
         for (String url : start_urls) {
@@ -33,10 +40,26 @@ public class WikiCrawler {
         }
     }
 
+    public void set_max_pages(int max){
+        MAX_PAGES = max;
+    }
+
+    public int get_max_pages(){
+        return MAX_PAGES;
+    }
+
+    /**
+     * Overloaded function "Crawl" in order to cleanly recursively loop
+     * @param url Next URL found
+     */
     private void crawl(String url){
         this.url = url;
         crawl();
     }
+
+    /**
+     * Main Crawl method which recursively crawls onto English Wikipedia.org pages
+     */
     private void crawl() {
         if (!url.contains("en.wikipedia.org")) return;
         url = clean_url(url);
@@ -44,7 +67,7 @@ public class WikiCrawler {
 
         System.out.println("Crawling: " + url);
         visited.add(url);
-
+        // Uses Jsoup to connect establish http connection with the given url
         try {
             Document doc = Jsoup.connect(url).timeout(5000).get();
             Elements links = doc.select("a[href]");
@@ -57,7 +80,7 @@ public class WikiCrawler {
 
             urlToText.put(url, clean_text);
 
-
+            // Loops on the list of links and picks the first appropriate URL to go to next
             for (Element link : links) {
                 String nextUrl = link.absUrl("href");
                 nextUrl = clean_url(nextUrl);
@@ -71,6 +94,11 @@ public class WikiCrawler {
         }
     }
 
+    /**
+     * Checks if the given URL is Metadata link
+     * @param url
+     * @return Boolean value
+     */
     private static boolean is_valid_doc(String url) {
         if (!url.startsWith("https://en.wikipedia.org/wiki/")) return false;
 
@@ -78,6 +106,11 @@ public class WikiCrawler {
         return !title.contains(":") && !title.startsWith("Main_Page");
     }
 
+    /**
+     * Cleans the URL from any unwanted Strings or Symbols
+     * @param url
+     * @return Clean URL
+     */
     private String clean_url(String url) {
         try {
             URI uri = new URI(url);
@@ -87,6 +120,11 @@ public class WikiCrawler {
         }
     }
 
+    /**
+     * Tokenizes text by removing any symbols or filler words
+     * @param text
+     * @return Clean text ready to store in Inverted Index
+     */
     private String[] tokenize(String text) {
         return Arrays.stream(text.toLowerCase().split("[\\s.,;:!?()\"'-]+"))
                 .filter(word -> word.length() >= 3)

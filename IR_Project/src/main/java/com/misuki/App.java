@@ -8,6 +8,7 @@ public class App
 
     public static void main( String[] args )
     {
+        int MAX_PAGES = 10;
         System.out.println("hello world");
         String[] startUrls = {
                 "https://en.wikipedia.org/wiki/List_of_pharaohs",
@@ -15,6 +16,7 @@ public class App
         };
 
         JWEC crawler = new JWEC(startUrls);
+        crawler.set_max_pages(MAX_PAGES);
         crawler.start();
 
 
@@ -23,8 +25,6 @@ public class App
         for (Map.Entry<String, Double> tfentry : crawler.search(query).entrySet()){
             System.out.println("key: "+tfentry.getKey()+" | value: "+tfentry.getValue());
         }
-
-
 
     }
 
